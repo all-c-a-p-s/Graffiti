@@ -62,9 +62,14 @@ pub fn get_climbs() -> Result<Vec<Vec<String>>, &'static str> {
 
     let mut climbs_list: Vec<Vec<String>> = Vec::new();
     let mut line_num = FIRST_CLIMB_LINE_NUMBER - 1;
+
+    #[allow(unused_assignments)]
     let mut next: Option<Vec<String>> = Some(Vec::new());
-    while next.is_some() {
+    loop {
         (next, line_num) = next_climb(line_num, &lines);
+        if next.is_none() {
+            break;
+        }
         climbs_list.push(next.clone().expect("tried to append None climb to climb vec"));
     }
 

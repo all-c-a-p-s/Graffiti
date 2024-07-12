@@ -362,11 +362,8 @@ fn read_route() -> Route {
 fn main() {
     //let r = read_route();
     //println!("{}", r);
-    let climbs  = match get_climbs() {
-        Ok(v) => v,
+    match get_climbs() {
+        Ok(v) => {},
         Err(e) => panic!("{}", e),
     };
-    for line in climbs[0].clone() {
-        println!("{}", line);
-    }
 }
