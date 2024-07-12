@@ -49,7 +49,7 @@ pub fn next_climb(line_num: usize, lines: &Vec<String>) -> (Option<Vec<String>>,
             }
         }
     }
-    unreachable!()
+    (None, LAST_CLIMB_LINE_NUMBER)
 }
 
 pub fn get_climbs() -> Result<Vec<Vec<String>>, &'static str> {
