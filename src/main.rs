@@ -14,10 +14,8 @@ fn main() {
         Ok(c) => c,
         Err(e) => panic!("{}", e),
     };
-    let first_climb = climbs[0].clone();
-    let find_test = find(String::from(r#""grade":"#), &first_climb);
-    match find_test {
-        Some(n) => println!("{}", n),
-        None => println!("did not find target string"),
-    }
+    let routes = climbs
+        .iter()
+        .map(|c| parse_climb(c.to_vec()))
+        .collect::<Vec<Route>>();
 }

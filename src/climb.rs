@@ -18,6 +18,14 @@ pub enum Grade {
     V14,
 }
 
+#[derive(Copy, Clone, PartialEq)]
+pub enum PositionState {
+    Start,
+    Finish,
+    Handhold,
+    Empty,
+}
+
 impl Display for Grade {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match *self {
@@ -46,13 +54,38 @@ impl HoldMatrix {
     }
 }
 
+// how to store route holds in order
+// hold struct which has properties of holds
+// then use Vec<Hold>
+
+#[derive(Copy, Clone, PartialEq)]
+pub struct Hold {
+    pub state: PositionState,
+    pub order: usize,
+}
+
+impl Hold {
+    pub fn from(state: PositionState, order: usize) -> Self {
+        Self {
+            state,
+            order,
+        }
+    }
+}
+
+impl Default for Hold {
+    fn default() -> Self {
+        Self {
+            state: PositionState::Empty,
+            order: 0,
+        }
+    }
+}
+
 pub struct Route {
-    name: String,
-    grade: Grade,
-    start_holds: HoldMatrix,
-    finish_holds: HoldMatrix,
-    feet_only_holds: HoldMatrix,
-    handholds: HoldMatrix,
+    pub name: String,
+    pub grade: Grade,
+    pub holds: [[Hold; 11]; 18],
 }
 
 impl Default for Route {
@@ -60,10 +93,7 @@ impl Default for Route {
         Self {
             name: String::from("default"),
             grade: Grade::V4,
-            start_holds: HoldMatrix::from([[false; 11]; 18]),
-            finish_holds: HoldMatrix::from([[false; 11]; 18]),
-            feet_only_holds: HoldMatrix::from([[false; 11]; 18]),
-            handholds: HoldMatrix::from([[false; 11]; 18]),
+            holds: [[Hold::default(); 11]; 18],
         }
     }
 }
@@ -73,16 +103,11 @@ impl Display for Route {
         let mut s = String::new();
         for row in (0..ROWS).rev() {
             for column in 0..COLUMNS {
-                if self.start_holds.holds[row][column] {
-                    s += "S"
-                } else if self.finish_holds.holds[row][column] {
-                    s += "T"
-                } else if self.feet_only_holds.holds[row][column] {
-                    s += "F"
-                } else if self.handholds.holds[row][column] {
-                    s += "H"
-                } else {
-                    s += "_"
+                match self.holds[row][column].state {
+                    PositionState::Start => s += "S",
+                    PositionState::Finish => s += "T",
+                    PositionState::Handhold => s += "H",
+                    PositionState::Empty => s += "_",
                 }
                 if column != COLUMNS - 1 {
                     s += " "
@@ -111,8 +136,20 @@ impl HoldMatrix {
 }
 
 impl Route {
+    pub fn count_target(&self, target: PositionState) -> usize {
+        let mut count: usize = 0;
+        for row in 0..ROWS {
+            for column in 0..COLUMNS {
+                if self.holds[row][column].state == target {
+                    count += 1;
+                }
+            }
+        }
+        count
+    }
+
     pub fn check_valid(&self) -> std::io::Result<()> {
-        match self.start_holds.count_holds() {
+        match self.count_target(PositionState::Start) {
             0 => panic!("This route is invalid becuase it has no start holds"),
             1..=2 => {}
             k => panic!(
@@ -120,7 +157,7 @@ impl Route {
                 k
             ),
         }
-        match self.finish_holds.count_holds() {
+        match self.count_target(PositionState::Finish) {
             0 => panic!("This route is invalid because it has no finish holds"),
             1..=2 => {}
             k => panic!(
@@ -128,65 +165,18 @@ impl Route {
                 k
             ),
         }
-
-        pub fn count_true(
-            index: (usize, usize),
-            h1: &HoldMatrix,
-            h2: &HoldMatrix,
-            h3: &HoldMatrix,
-            h4: &HoldMatrix,
-        ) -> usize {
-            let mut res = 0;
-            if h1.holds[index.0][index.1] {
-                res += 1
-            }
-            if h2.holds[index.0][index.1] {
-                res += 1
-            }
-            if h3.holds[index.0][index.1] {
-                res += 1
-            }
-            if h4.holds[index.0][index.1] {
-                res += 1
-            }
-            res
-        }
-
-        for row in 0..ROWS {
-            for column in 0..COLUMNS {
-                if count_true(
-                    (row, column),
-                    &self.start_holds,
-                    &self.finish_holds,
-                    &self.handholds,
-                    &self.feet_only_holds,
-                ) > 1
-                {
-                    panic!(
-                        "This route is invalid because hold {} used more than once",
-                        hold_index_to_name((row, column))
-                    )
-                }
-            }
-        }
         return Ok(());
     }
 
     pub fn from(
         name: String,
         grade: Grade,
-        start_holds: HoldMatrix,
-        finish_holds: HoldMatrix,
-        feet_only_holds: HoldMatrix,
-        handholds: HoldMatrix,
+        holds: [[Hold; 11]; 18],
     ) -> Self {
         Self {
             name,
             grade,
-            start_holds,
-            finish_holds,
-            feet_only_holds,
-            handholds,
+            holds,
         }
     }
 }
@@ -240,6 +230,24 @@ impl Grade {
             14 => Grade::V14,
             _ => unreachable!(),
         }
+    }
+
+    pub fn from_font(font_grade: String) -> Grade {
+        let hueco = match font_grade.as_str() {
+            "6B" | "6B+" => "V4",
+            "6C" | "6C+" => "V5",
+            "7A" => "V6",
+            "7A+" => "V7",
+            "7B" | "7B+" => "V8",
+            "7C" => "V9",
+            "7C+" => "V10",
+            "8A" => "V11",
+            "8A+" => "V12",
+            "8B" => "V13",
+            "8B+" => "V14",
+            _ => panic!("invalid font grade {}", font_grade),
+        };
+        Grade::from_string(String::from(hueco))
     }
 }
 
@@ -325,6 +333,19 @@ impl HoldMatrix {
     }
 }
 
+pub fn set_from_hold_names(s: String, route: &mut Route, to_set: PositionState) {
+    //taken in as space-separated hold names e.g. A2 B5 D11 etc.
+    let indidices = s
+        .split_whitespace()
+        .map(|x| name_to_arr_index(x))
+        .collect::<Vec<(usize, usize)>>();
+    let mut count = 0;
+    for i in indidices {
+        route.holds[i.0][i.1] = Hold::from(to_set, count);
+        count += 1;
+    }
+}
+
 pub fn read_holds() -> String {
     let mut input = String::new();
     io::stdin()
@@ -334,31 +355,25 @@ pub fn read_holds() -> String {
     input
 }
 
+//TODO: implementation for hold order
 pub fn read_route() -> Route {
+    let mut route = Route::default();
     let name = read_route_name();
+    route.name = name;
     let grade = read_grade();
+    route.grade = grade;
 
     println!("Enter start holds: ");
-    let start_holds = HoldMatrix::from_hold_names(read_holds());
+    set_from_hold_names(read_holds(), &mut route, PositionState::Start);
 
     println!("Enter finish holds: ");
-    let finish_holds = HoldMatrix::from_hold_names(read_holds());
-
-    println!("Enter feet only holds: ");
-    let feet_only_holds = HoldMatrix::from_hold_names(read_holds());
+    set_from_hold_names(read_holds(), &mut route, PositionState::Finish);
 
     println!("Enter handholds: ");
-    let handholds = HoldMatrix::from_hold_names(read_holds());
-    let r = Route::from(
-        name,
-        grade,
-        start_holds,
-        finish_holds,
-        feet_only_holds,
-        handholds,
-    );
-    match r.check_valid() {
-        Ok(_) => return r,
+    set_from_hold_names(read_holds(), &mut route, PositionState::Handhold);
+
+    match route.check_valid() {
+        Ok(_) => return route,
         Err(e) => panic!("{}", e),
     }
 }

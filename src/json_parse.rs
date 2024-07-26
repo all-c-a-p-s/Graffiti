@@ -3,10 +3,10 @@ use std::io::prelude::*;
 
 use crate::climb::*;
 
-const PATH: &str = "json/test.json";
+const PATH: &str = "json/2016.json";
 
-const LAST_CLIMB_LINE_NUMBER: usize = 157;
 const FIRST_CLIMB_LINE_NUMBER: usize = 3;
+const LAST_CLIMB_LINE_NUMBER: usize = 5143741;
 // change back to 5143741 for non-test version
 
 pub fn read_from_file() -> Result<String, &'static str> {
@@ -111,17 +111,90 @@ pub fn find(target: String, lines: &Vec<String>) -> Option<usize> {
 }
 
 // TODO: read in moves in sequence + update moves struct to record move sequence
-pub fn parse_climb(lines: Vec<String>) -> Route {
+// TODO: name!
+pub fn parse_climb(mut lines: Vec<String>) -> Route {
+    //basically all climbs are feet follow hands so there isn't even enough data on non-feet follow hands climbs
+    //so just assume that the climb is feet follow hands
+    let mut route = Route::default();
     let grade_line =
         &lines[find(String::from(r#""grade":"#), &lines).expect("failed to find grade")];
-    let grade = Grade::from_string(String::from(
+    let grade = String::from(
         grade_line
             .split_ascii_whitespace()
             .map(|x| String::from(x))
             .collect::<Vec<String>>()[1]
-            .strip_suffix(|_| true)
-            .expect("no comma at the end of the line"),
-    ));
+            .strip_suffix(r#"","#)
+            .expect("failed to strip suffix from string")
+            .strip_prefix(r#"""#)
+            .expect("failed to strip prefix from string"),
+    );
 
-    Route::default()
+    let name_line = &lines[find(String::from(r#""name":"#), &lines).expect("failed to find grade")];
+    let name = String::from(&name_line.trim()[8..]);
+
+    route.name = name;
+
+    route.grade = Grade::from_font(grade);
+
+    let mut holds_vec: Vec<Hold> = Vec::new();
+
+    let mut cursor = find(String::from(r#""problemId":"#), &lines);
+    let mut count = 0;
+    //search for this as this string is unique to the lists of holds
+    while cursor.is_some() {
+        let unwrapped = cursor.unwrap();
+        let hold_position_line = unwrapped + 1; //always on line immediately after
+
+        let hold_position = 
+            &lines[hold_position_line]
+                .split_ascii_whitespace()
+                .map(|s| String::from(s))
+                .collect::<Vec<String>>()[1][1..=2];
+
+        let is_start_line = hold_position_line + 1;
+
+        let is_start: bool = String::from(
+            &lines[is_start_line]
+                .split_ascii_whitespace()
+                .map(|s| String::from(s))
+                .collect::<Vec<String>>()[1]
+                .strip_suffix(',')
+                .unwrap()
+                .to_owned(),
+        )
+        .parse()
+        .unwrap();
+
+        let is_end_line = is_start_line + 1;
+
+        let is_end: bool = String::from(
+            &lines[is_end_line]
+                .split_ascii_whitespace()
+                .map(|s| String::from(s))
+                .collect::<Vec<String>>()[1]
+                .to_owned(),
+        )
+        .parse()
+        .unwrap();
+
+        let state = if is_start {
+            PositionState::Start
+        } else if is_end {
+            PositionState::Finish
+        } else {
+            PositionState::Handhold
+        };
+
+        let hold = Hold::from(state, count);
+        count += 1;
+        
+        let index = name_to_arr_index(hold_position);
+        route.holds[index.0][index.1] = hold;
+
+        lines.drain(0..=is_end_line);
+
+        cursor = find(String::from(r#""problemId":"#), &lines);
+    }
+
+    route
 }
