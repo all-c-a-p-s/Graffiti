@@ -2,20 +2,27 @@
 #![allow(unused)]
 
 use crate::climb::*;
+use crate::gui::*;
 use crate::json_parse::*;
 
 pub mod climb;
+pub mod gui;
 pub mod json_parse;
 
-fn main() {
+fn main() -> eframe::Result {
     //let r = read_route();
     //println!("{}", r);
-    let climbs = match get_climbs() {
-        Ok(c) => c,
-        Err(e) => panic!("{}", e),
+    let options = eframe::NativeOptions {
+        viewport: egui::ViewportBuilder::default().with_inner_size([800.0, 800.0]),
+        ..Default::default()
     };
-    let routes = climbs
-        .iter()
-        .map(|c| parse_climb(c.to_vec()))
-        .collect::<Vec<Route>>();
+    eframe::run_native(
+        "Graffiti",
+        options,
+        Box::new(|cc| {
+            // This gives us image support:
+            egui_extras::install_image_loaders(&cc.egui_ctx);
+            Ok(Box::<Graffiti>::default())
+        }),
+    )
 }
