@@ -12,8 +12,11 @@ Model: "functional"
 | classification_head_1 (Softmax) | (None, 11)   | 0       |
 
  Total params: 2,191 (8.56 KB)
+ 
  Trainable params: 2,189 (8.55 KB)
+ 
  Non-trainable params: 0 (0.00 B)
+ 
  Optimizer params: 2 (12.00 B)
 
 At present, it is able to guess the grade of a route with between 45 and 50 percent accuracy, which I am fairly happy with, given that it has 11 possible grades to choose from.
