@@ -47,9 +47,13 @@ def analyse_output(output):
 
     print(f"\nPredicted Grade: {best_grade}")
 
-c = set_route(["j2"], ["g7", "a10", "a11", "a13", "g15"], ["h18"])
+START_HOLDS = ["j2"]
+INTERMEDIATE_HOLDS = ["g7", "a10", "a11", "a13", "g15"]
+FINISH_HOLDS = ["h18"]
 
-input = np.array([c])
+c = set_route(START_HOLDS, INTERMEDIATE_HOLDS, FINISH_HOLDS)
 
-output = model.predict(input)
-analyse_output(output)
+def run_model():
+    input = np.array([c])
+    output = model.predict(input)
+    analyse_output(output)

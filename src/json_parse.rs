@@ -145,11 +145,10 @@ pub fn parse_climb(mut lines: Vec<String>) -> Route {
         let unwrapped = cursor.unwrap();
         let hold_position_line = unwrapped + 1; //always on line immediately after
 
-        let hold_position = 
-            &lines[hold_position_line]
-                .split_ascii_whitespace()
-                .map(|s| String::from(s))
-                .collect::<Vec<String>>()[1][1..=2];
+        let hold_position = &lines[hold_position_line]
+            .split_ascii_whitespace()
+            .map(|s| String::from(s))
+            .collect::<Vec<String>>()[1][1..=2];
 
         let is_start_line = hold_position_line + 1;
 
@@ -187,7 +186,7 @@ pub fn parse_climb(mut lines: Vec<String>) -> Route {
 
         let hold = Hold::from(state, count);
         count += 1;
-        
+
         let index = name_to_arr_index(hold_position);
         route.holds[index.0][index.1] = hold;
 

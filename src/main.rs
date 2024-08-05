@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 #![allow(unused)]
 
+use model::import_model;
+
 use crate::climb::*;
 use crate::gui::*;
 use crate::json_parse::*;
@@ -8,7 +10,14 @@ use crate::json_parse::*;
 pub mod climb;
 pub mod gui;
 pub mod json_parse;
+#[path = "/Users/seba/rs/graffiti/src/model/model.rs"]
+pub mod model;
 
+fn main() {
+    import_model();
+}
+
+/* 
 fn main() -> eframe::Result {
     //let r = read_route();
     //println!("{}", r);
@@ -26,3 +35,4 @@ fn main() -> eframe::Result {
         }),
     )
 }
+*/

@@ -66,10 +66,7 @@ pub struct Hold {
 
 impl Hold {
     pub fn from(state: PositionState, order: usize) -> Self {
-        Self {
-            state,
-            order,
-        }
+        Self { state, order }
     }
 }
 
@@ -168,16 +165,8 @@ impl Route {
         return Ok(());
     }
 
-    pub fn from(
-        name: String,
-        grade: Grade,
-        holds: [[Hold; 11]; 18],
-    ) -> Self {
-        Self {
-            name,
-            grade,
-            holds,
-        }
+    pub fn from(name: String, grade: Grade, holds: [[Hold; 11]; 18]) -> Self {
+        Self { name, grade, holds }
     }
 }
 
