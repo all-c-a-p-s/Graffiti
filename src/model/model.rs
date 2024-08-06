@@ -11,14 +11,14 @@ pub fn import_model() {
         env!("CARGO_MANIFEST_DIR"),
         "/src/model/model.py"
     ));
-    let train = include_str!(concat!(
+    let auto = include_str!(concat!(
         env!("CARGO_MANIFEST_DIR"),
-        "/src/model/train.py"
+        "/src/model/auto.py"
     ));
 
     prepare_freethreaded_python();
     let from_python = Python::with_gil(|py| -> PyResult<Py<PyAny>> {
-        PyModule::from_code_bound(py, train, "train", "train")?;
+        PyModule::from_code_bound(py, auto, "auto", "auto")?;
         let model: Py<PyAny> = PyModule::from_code_bound(py, model, "", "")?
             .getattr("run_model")?
             .into();

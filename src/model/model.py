@@ -1,18 +1,20 @@
 import tensorflow as tf
 import numpy as np
-import train
+import auto
 
-model = tf.keras.models.load_model("model.keras")
+model = tf.keras.models.load_model("custom_model.keras")
+
+model.summary()
 
 def set_route(start_holds, finish_holds, intermediate_holds):
     #set the holds specified to start holds
     r = np.zeros(198)
     for h in start_holds:
-        r[train.convert_coordinate_to_int(h)] = 1
+        r[auto.convert_coordinate_to_int(h)] = 1
     for h in finish_holds:
-        r[train.convert_coordinate_to_int(h)] = 2
+        r[auto.convert_coordinate_to_int(h)] = 2
     for h in intermediate_holds:
-        r[train.convert_coordinate_to_int(h)] = 3
+        r[auto.convert_coordinate_to_int(h)] = 3
     return r
 
 def analyse_output(output):
@@ -57,3 +59,5 @@ def run_model():
     input = np.array([c])
     output = model.predict(input)
     analyse_output(output)
+
+run_model()
