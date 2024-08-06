@@ -1,8 +1,6 @@
 #![allow(dead_code)]
 #![allow(unused)]
 
-use model::import_model;
-
 use crate::climb::*;
 use crate::gui::*;
 use crate::json_parse::*;
@@ -13,16 +11,13 @@ pub mod json_parse;
 #[path = "/Users/seba/rs/graffiti/src/model/model.rs"]
 pub mod model;
 
-fn main() {
-    import_model();
-}
-
-/* 
 fn main() -> eframe::Result {
     //let r = read_route();
     //println!("{}", r);
+    //import_model();
+
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default().with_inner_size([800.0, 800.0]),
+        viewport: egui::ViewportBuilder::default(),
         ..Default::default()
     };
     eframe::run_native(
@@ -35,4 +30,3 @@ fn main() -> eframe::Result {
         }),
     )
 }
-*/

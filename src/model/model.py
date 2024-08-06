@@ -4,8 +4,6 @@ import auto
 
 model = tf.keras.models.load_model("/Users/seba/rs/graffiti/models/custom_model.keras")
 
-model.summary()
-
 
 def set_route(start_holds, finish_holds, intermediate_holds):
     # set the holds specified to start holds
@@ -22,7 +20,8 @@ def set_route(start_holds, finish_holds, intermediate_holds):
 def analyse_output(output):
     # expects a tensor (primtitive type 2d np.array()) to be inputted
     # in my usage of the model.predict() function, this will only ever have one element
-    print("------------------")
+    s = ""
+    s += "------------------\n"
     max = 0
     best_grade = ""
     for i in range(0, 11):
@@ -34,26 +33,27 @@ def analyse_output(output):
 
         # this is done so that the table is formatted nicely
         if len(grade) == 2 and len(probability) == 1:
-            print("|   " + grade + "   |   " + probability + "   |")
+            s += "|   " + grade + "   |   " + probability + "   |\n"
         elif len(grade) == 2 and len(probability) == 2:
-            print("|   " + grade + "   |   " + probability + "  |")
+            s += "|   " + grade + "   |   " + probability + "  |\n"
         elif len(grade) == 2 and len(probability) == 3:
-            print("|   " + grade + "   |  " + probability + "  |")
+            s += "|   " + grade + "   |  " + probability + "  |\n"
         elif len(grade) == 3 and len(probability) == 1:
-            print("|   " + grade + "  |   " + probability + "   |")
+            s += "|   " + grade + "  |   " + probability + "   |\n"
         elif len(grade) == 3 and len(probability) == 2:
-            print("|   " + grade + "  |   " + probability + "  |")
+            s += "|   " + grade + "  |   " + probability + "  |\n"
         elif len(grade) == 3 and len(probability) == 3:
-            print("|   " + grade + "  |  " + probability + "  |")
+            s += "|   " + grade + "  |  " + probability + "  |\n"
 
-        print("------------------")
+        s += "------------------\n"
 
-    print(f"\nPredicted Grade: {best_grade}")
+    s += f"\nPredicted Grade: {best_grade}"
+    return s
 
 
-START_HOLDS = ["j2"]
-INTERMEDIATE_HOLDS = ["g7", "a10", "a11", "a13", "g15"]
-FINISH_HOLDS = ["h18"]
+START_HOLDS = ["e6"]
+INTERMEDIATE_HOLDS = ["h16", "f14", "i12", "g10", "g9", "j5"]
+FINISH_HOLDS = ["e18"]
 
 c = set_route(START_HOLDS, INTERMEDIATE_HOLDS, FINISH_HOLDS)
 
@@ -61,7 +61,9 @@ c = set_route(START_HOLDS, INTERMEDIATE_HOLDS, FINISH_HOLDS)
 def run_model():
     input = np.array([c])
     output = model.predict(input)
-    analyse_output(output)
+    print(analyse_output(output))
+    # print(output)
+    return output
 
 
-# run_model()
+run_model()
