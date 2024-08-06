@@ -3,7 +3,12 @@ use std::io::prelude::*;
 
 use crate::climb::*;
 
-const PATH: &str = "json/2016.json";
+/*
+ * Currently I am not actually using any of the code in this file because I ended up just using
+ * pandas. It might be useful in the fututre to be able to parse the json in Rust though...
+*/
+
+const PATH: &str = "/Users/seba/rs/graffiti/json/2016.json";
 
 const FIRST_CLIMB_LINE_NUMBER: usize = 3;
 const LAST_CLIMB_LINE_NUMBER: usize = 5143741;

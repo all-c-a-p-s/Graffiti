@@ -2,12 +2,13 @@ import tensorflow as tf
 import numpy as np
 import auto
 
-model = tf.keras.models.load_model("custom_model.keras")
+model = tf.keras.models.load_model("/Users/seba/rs/graffiti/models/custom_model.keras")
 
 model.summary()
 
+
 def set_route(start_holds, finish_holds, intermediate_holds):
-    #set the holds specified to start holds
+    # set the holds specified to start holds
     r = np.zeros(198)
     for h in start_holds:
         r[auto.convert_coordinate_to_int(h)] = 1
@@ -17,20 +18,21 @@ def set_route(start_holds, finish_holds, intermediate_holds):
         r[auto.convert_coordinate_to_int(h)] = 3
     return r
 
+
 def analyse_output(output):
-    #expects a tensor (primtitive type 2d np.array()) to be inputted
-    #in my usage of the model.predict() function, this will only ever have one element
+    # expects a tensor (primtitive type 2d np.array()) to be inputted
+    # in my usage of the model.predict() function, this will only ever have one element
     print("------------------")
     max = 0
     best_grade = ""
-    for i in range(0,11):
+    for i in range(0, 11):
         grade = "v" + str(i + 4)
         probability = str(round(output[0][i] * 100))
         if output[0][i] > max:
             best_grade = grade
             max = output[0][i]
-        
-        #this is done so that the table is formatted nicely
+
+        # this is done so that the table is formatted nicely
         if len(grade) == 2 and len(probability) == 1:
             print("|   " + grade + "   |   " + probability + "   |")
         elif len(grade) == 2 and len(probability) == 2:
@@ -44,10 +46,10 @@ def analyse_output(output):
         elif len(grade) == 3 and len(probability) == 3:
             print("|   " + grade + "  |  " + probability + "  |")
 
-
         print("------------------")
 
     print(f"\nPredicted Grade: {best_grade}")
+
 
 START_HOLDS = ["j2"]
 INTERMEDIATE_HOLDS = ["g7", "a10", "a11", "a13", "g15"]
@@ -55,9 +57,11 @@ FINISH_HOLDS = ["h18"]
 
 c = set_route(START_HOLDS, INTERMEDIATE_HOLDS, FINISH_HOLDS)
 
+
 def run_model():
     input = np.array([c])
     output = model.predict(input)
     analyse_output(output)
 
-run_model()
+
+# run_model()
