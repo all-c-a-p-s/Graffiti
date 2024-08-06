@@ -3,6 +3,7 @@ Graffiti is a work-in-progress project with the aim to set human-like climbing r
 
 ## The Grade Prediction Model
 The model uses the following architecture:
+
 Model: "functional"
 | Layer (type)             | Output Shape   | Param # |
 |--------------------------|----------------|---------|
