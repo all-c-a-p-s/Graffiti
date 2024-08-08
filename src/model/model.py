@@ -51,9 +51,9 @@ def analyse_output(output):
     return s
 
 
-START_HOLDS = ["e6"]
-INTERMEDIATE_HOLDS = ["h16", "f14", "i12", "g10", "g9", "j5"]
-FINISH_HOLDS = ["e18"]
+START_HOLDS = ["a5", "c5"]
+INTERMEDIATE_HOLDS = ["b7", "d9", "c11", "d13", "e15", "d16"]
+FINISH_HOLDS = ["c18"]
 
 c = set_route(START_HOLDS, INTERMEDIATE_HOLDS, FINISH_HOLDS)
 
