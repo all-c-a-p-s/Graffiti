@@ -1,7 +1,7 @@
 use eframe::egui::*;
 use egui::{Color32, Painter, Pos2, Rect, Rounding, Vec2};
 
-use crate::model::{run_model, write_holds_to_file};
+use crate::model::run_model;
 
 const START_CIRCLE_COLOUR: Color32 = Color32::GREEN;
 const FINISH_CIRCLE_COLOUR: Color32 = Color32::RED;
@@ -88,7 +88,7 @@ impl eframe::App for Graffiti {
                             self.start_holds.clone(),
                             self.finish_holds.clone(),
                             self.intermediate_holds.clone(),
-                        ));
+                        ).expect("failed to run model"));
                     },
                 );
                 ui.add_sized(

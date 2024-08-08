@@ -27,6 +27,7 @@ def convert_coordinate_to_int(coordinate) -> int:
     row = int(coordinate[1:])
     return 11 * (row - 1) + column
 
+
 #used to convert string labels to tensor-convertible integers
 def convert_grade_to_int(grade) -> int:
     match grade:

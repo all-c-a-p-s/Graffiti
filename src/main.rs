@@ -12,10 +12,6 @@ pub mod json_parse;
 pub mod model;
 
 fn main() -> eframe::Result {
-    //let r = read_route();
-    //println!("{}", r);
-    //import_model();
-
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default(),
         ..Default::default()

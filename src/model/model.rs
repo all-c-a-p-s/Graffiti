@@ -1,122 +1,54 @@
-use pyo3::prelude::*;
-use pyo3::prepare_freethreaded_python;
-use std::fs::*;
-use std::io::Write;
-use std::path::Path;
+use std::io::BufReader;
 
-pub fn write_holds_to_file(
-    start_holds: Vec<String>,
-    finish_holds: Vec<String>,
-    intermediate_holds: Vec<String>,
-) -> std::io::Result<()> {
-    let path = Path::new("/Users/seba/rs/graffiti/src/model/model.py");
-    let file_contents = std::fs::read_to_string(path).expect("failed to read from file");
-    let mut lines = file_contents
-        .lines()
-        .collect::<Vec<&str>>()
-        .iter()
-        .map(|x| String::from(*x))
-        .collect::<Vec<String>>();
+use tract_core::ndarray;
+use tract_onnx::prelude::*;
 
-    for i in 0..lines.len() {
-        let line = lines[i].clone();
-        let words = line
-            .as_str()
-            .split_whitespace()
-            .map(|x| String::from(x))
-            .collect::<Vec<String>>();
+use crate::hold_index_to_name;
+use crate::name_to_arr_index;
 
-        if words.len() == 0 {
-            continue;
-        }
-
-        match words[0].as_str() {
-            "START_HOLDS" => lines[i] = edit_line(String::from("START_HOLDS"), start_holds.clone()),
-            "INTERMEDIATE_HOLDS" => {
-                lines[i] = edit_line(
-                    String::from("INTERMEDIATE_HOLDS"),
-                    intermediate_holds.clone(),
-                )
-            }
-            "FINISH_HOLDS" => {
-                lines[i] = edit_line(String::from("FINISH_HOLDS"), finish_holds.clone())
-            }
-            _ => {}
-        }
+pub fn run_model(start_holds: Vec<String>, finish_holds: Vec<String>, intermediate_holds: Vec<String>) -> TractResult<String> {
+    let mut holds_data: Vec<f32> = vec![0.0; 198];
+    for hold in start_holds {
+        let idx = name_to_arr_index(hold.as_str());
+        holds_data[idx.0 * 11 + idx.1] = 1.0;
+    }
+    for hold in finish_holds {
+        let idx = name_to_arr_index(hold.as_str());
+        holds_data[idx.0 * 11 + idx.1] = 2.0;
+    }
+    for hold in intermediate_holds {
+        let idx = name_to_arr_index(hold.as_str());
+        holds_data[idx.0 * 11 + idx.1] = 3.0;
     }
 
-    let rewritten_lines = lines
-        .iter()
-        .fold(String::new(), |acc, l| acc + (l.to_owned() + "\n").as_str());
-    std::fs::write(
-        "/Users/seba/rs/graffiti/src/model/model.py",
-        rewritten_lines.as_str().as_bytes(),
-    );
-    Ok(())
-}
+    //include NN data at compile time
+    let nn_data = include_bytes!("/Users/seba/rs/graffiti/models/custom_model.onnx");
+    let mut reader = BufReader::new(&nn_data[..]);
 
-pub fn edit_line(first_word: String, mut holds: Vec<String>) -> String {
-    //this should only be called with the START_HOLDS, FINISH_HOLDS, and INTERMEDIATE_HOLDS lines
-    let mut arr: String = String::from("[");
-    for i in 0..holds.len() {
-        arr += r#"""#;
-        arr += holds[i].as_str();
-        arr += r#"""#;
-        if i != holds.len() - 1 {
-            arr += ", "
-        }
-    }
-    arr += "]";
+    let model = tract_onnx::onnx()
+        .model_for_read(&mut reader)?
+        .into_optimized()?
+        .into_runnable()?;
 
-    match first_word.as_str() {
-        "START_HOLDS" => String::from("START_HOLDS = ") + arr.as_str(),
-        "FINISH_HOLDS" => String::from("FINISH_HOLDS = ") + arr.as_str(),
-        "INTERMEDIATE_HOLDS" => String::from("INTERMEDIATE_HOLDS = ") + arr.as_str(),
-        _ => unreachable!(),
-    }
-}
+    let input = tract_ndarray::Array2::from_shape_vec((1, 198), holds_data)?;
+    let input = Tensor::from(input);
+    let output = model.run(tvec!(input.into()))?;
 
-pub fn run_model(
-    start_holds: Vec<String>,
-    finish_holds: Vec<String>,
-    intermediate_holds: Vec<String>,
-) -> String {
-    match write_holds_to_file(start_holds, finish_holds, intermediate_holds) {
-        Ok(_) => println!("wrote holds to file"),
-        Err(_) => panic!("failed to write holds to file"),
-    }
-
-    //important: do NOT use the include_str!() macro to include this at compile time
-    //or the updated file will not be used
-    let model = std::fs::read_to_string("/Users/seba/rs/graffiti/src/model/model.py")
-        .expect("failed to read model file");
-    let auto = std::fs::read_to_string("/Users/seba/rs/graffiti/src/model/auto.py")
-        .expect("failed to read model file");
-
-    prepare_freethreaded_python();
-    let from_python = Python::with_gil(|py| -> PyResult<Py<PyAny>> {
-        PyModule::from_code_bound(py, auto.as_str(), "auto", "auto")?;
-        let model: Py<PyAny> = PyModule::from_code_bound(py, model.as_str(), "", "")?
-            .getattr("run_model")?
-            .into();
-        model.call0(py).expect("failed to call model").extract(py)
-    })
-    .expect("failed to convert output of model");
-    let output = format!("{}", from_python);
-    println!("{}", output);
-    let probablities = output[2..output.len() - 2]
-        .split_whitespace()
-        .map(|x| str::parse::<f32>(x).expect("failed to convert to float"))
-        .collect::<Vec<f32>>();
+    let probabilities = output[0]
+        .to_array_view::<f32>()
+        .expect("failed to convert tensor to array")
+        .as_slice()
+        .unwrap()
+        .to_owned();
 
     let mut max: f32 = 0.0;
     let mut most_likely_grade = 4;
 
-    for i in 0..probablities.len() {
-        if probablities[i] > max {
-            max = probablities[i];
+    for i in 0..probabilities.len() {
+        if probabilities[i] > max {
+            max = probabilities[i];
             most_likely_grade = i + 4;
         }
     }
-    format!("I guess grade v{}", most_likely_grade)
+    Ok(format!("I guess grade v{}", most_likely_grade))
 }

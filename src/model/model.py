@@ -1,4 +1,5 @@
 import tensorflow as tf
+import tf2onnx
 import numpy as np
 import auto
 
@@ -51,9 +52,9 @@ def analyse_output(output):
     return s
 
 
-START_HOLDS = ["a5", "c5"]
-INTERMEDIATE_HOLDS = ["b7", "d9", "c11", "d13", "e15", "d16"]
-FINISH_HOLDS = ["c18"]
+START_HOLDS = ["j2"]
+INTERMEDIATE_HOLDS = []
+FINISH_HOLDS = ["h18"]
 
 c = set_route(START_HOLDS, INTERMEDIATE_HOLDS, FINISH_HOLDS)
 
@@ -66,4 +67,21 @@ def run_model():
     return output
 
 
-run_model()
+def save_model_directory():
+    model = tf.keras.models.load_model(
+        "/Users/seba/rs/graffiti/models/custom_model.keras"
+    )
+    model.export("/Users/seba/rs/graffiti/models/")
+
+
+def save_as_onnx():
+    model = tf.keras.models.load_model(
+        "/Users/seba/rs/graffiti/models/custom_model.keras"
+    )
+    onnx_model, _ = tf2onnx.convert.from_keras(model)
+    with open("/Users/seba/rs/graffiti/models/custom_model.onnx", "wb") as f:
+        f.write(onnx_model.SerializeToString())
+
+
+# run_model()
+save_model_directory()
