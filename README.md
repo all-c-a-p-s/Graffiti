@@ -23,11 +23,12 @@ Model: "functional"
  
  Optimizer params: 204,333 (798.18 KB)
 
-At present, it is able to guess the grade of a route with between 45 and 50 percent accuracy. According to [an excellent paper](https://ar5iv.labs.arxiv.org/html/2311.12419) on this subject, this is roughly equal to human accuracy.
+At present, it is able to guess the grade of a route with roughly 50 percent accuracy. According to [an excellent paper](https://ar5iv.labs.arxiv.org/html/2311.12419) on this subject, this is slightly better than human accuracy.
 
 
 ## TODOs
-- GUI interface to interact with the model (+ mobile app?)
+- some code to check for valid user inputs/handle erroneous inputs
+- improve GUI interface + deploy web app
 - model to set original routes
 
 ## Contributing
