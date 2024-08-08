@@ -1,6 +1,8 @@
 # Graffiti
 Graffiti is a work-in-progress project with the aim to set human-like climbing routes on the [moonboard](https://moonclimbing.com/moonboard). As an intermediate step to this, a model has been trained which is able to guess the Hueco grade (v4-v14) of a given route on the moonboard. 
 
+[](demo.png)
+
 ## The Grade Prediction Model
 The model uses the following architecture:
 
