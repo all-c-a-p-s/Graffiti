@@ -27,7 +27,8 @@ At present, it is able to guess the grade of a route with roughly 50 percent acc
 
 
 ## TODOs
-- some code to check for valid user inputs/handle erroneous inputs
+- some code to check for valid user inputs/handle erroneous inputs (such as trying to add holds that do not exist)
+- if possible, fix the issue that my model almost never guesses a grade harder than v10 because climbs with grades > v10 are so rare
 - improve GUI interface + deploy web app
 - model to set original routes
 
