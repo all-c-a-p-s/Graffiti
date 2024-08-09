@@ -25,6 +25,20 @@ pub struct Graffiti {
     intermediate_holds: Vec<String>,
 }
 
+impl Graffiti {
+    pub fn new(_cc: &eframe::CreationContext<'_>) -> Self {
+        Self {
+            new_start_hold: String::new(),
+            new_finish_hold: String::new(),
+            new_intermediate_hold: String::new(),
+            start_holds: vec![],
+            finish_holds: vec![],
+            intermediate_holds: vec![],
+
+        }
+    }
+}
+
 impl eframe::App for Graffiti {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -98,9 +112,10 @@ impl eframe::App for Graffiti {
                     )),
                 );
 
+                //TODO: maybe change from Foreground so that circles dont move when you scroll
                 let painter = Painter::new(
                     ctx.clone(),
-                    LayerId::new(Order::Foreground, Id::new("painter_id")),
+                    LayerId::new(Order::Middle, Id::new("painter_id")),
                     window_size,
                 );
 
