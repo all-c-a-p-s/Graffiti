@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
@@ -11,9 +10,9 @@
 
     <!-- config for our rust wasm binary. go to https://trunkrs.dev/assets/#rust for more customization -->
     
-<script type="module" nonce="/7AZpd8+zkqIZX2W4tkOYQ==">
-import init, * as bindings from '/graffiti-e848da4f701f4a8c.js';
-const wasm = await init('/graffiti-e848da4f701f4a8c_bg.wasm');
+<script type="module" nonce="ayVBOK2dHNsFGSZKy4tC2Q==">
+import init, * as bindings from 'https://all-c-a-p-s.github.io/Graffiti/graffiti-e848da4f701f4a8c.js';
+const wasm = await init('https://all-c-a-p-s.github.io/Graffiti/graffiti-e848da4f701f4a8c_bg.wasm');
 
 
 window.wasmBindings = bindings;
@@ -23,7 +22,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
 
 </script>
     <!-- this is the base url relative to which other urls will be constructed. trunk will insert this from the public-url option -->
-    <base href="/" />
+    <base href="https://all-c-a-p-s.github.io/Graffiti/" />
 
     
 
@@ -117,8 +116,8 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         }
     </style>
 
-<link rel="modulepreload" href="/graffiti-e848da4f701f4a8c.js" crossorigin=anonymous integrity="sha384-jvuqQYkGoN5gmlqtV5WJQDq6sPz//SUXQaXgcxsPKMXLatSqPtA7/tF38lMqvT64">
-<link rel="preload" href="/graffiti-e848da4f701f4a8c_bg.wasm" crossorigin=anonymous integrity="sha384-kGdJ8mxbrAkSRjLO0w9PdILXXnbQmBBqwQi8cth1cNrMGGSEorATnncU4um9NtRQ" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="https://all-c-a-p-s.github.io/Graffiti/graffiti-e848da4f701f4a8c.js" crossorigin=anonymous integrity="sha384-jvuqQYkGoN5gmlqtV5WJQDq6sPz//SUXQaXgcxsPKMXLatSqPtA7/tF38lMqvT64">
+<link rel="preload" href="https://all-c-a-p-s.github.io/Graffiti/graffiti-e848da4f701f4a8c_bg.wasm" crossorigin=anonymous integrity="sha384-kGdJ8mxbrAkSRjLO0w9PdILXXnbQmBBqwQi8cth1cNrMGGSEorATnncU4um9NtRQ" as="fetch" type="application/wasm"></head>
 
 <body>
     <!-- The WASM code will resize the canvas dynamically -->
