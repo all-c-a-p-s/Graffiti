@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
@@ -10,9 +9,22 @@
     <title>Graffiti</title>
 
     <!-- config for our rust wasm binary. go to https://trunkrs.dev/assets/#rust for more customization -->
-    <link data-trunk rel="rust" data-wasm-opt="2" />
+    
+<script type="module" nonce="nRpfDeDh8LFQ9bQo5+E13w==">
+import init, * as bindings from 'https://all-c-a-p-s.github.io/Graffiti/graffiti-e848da4f701f4a8c.js';
+const wasm = await init('https://all-c-a-p-s.github.io/Graffiti/graffiti-e848da4f701f4a8c_bg.wasm');
+
+
+window.wasmBindings = bindings;
+
+
+dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
+
+</script>
     <!-- this is the base url relative to which other urls will be constructed. trunk will insert this from the public-url option -->
-    <base data-trunk-public-url />
+    <base href="https://all-c-a-p-s.github.io/Graffiti/" />
+
+    
 
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="white">
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#404040">
@@ -103,7 +115,9 @@
             }
         }
     </style>
-</head>
+
+<link rel="modulepreload" href="https://all-c-a-p-s.github.io/Graffiti/graffiti-e848da4f701f4a8c.js" crossorigin=anonymous integrity="sha384-jvuqQYkGoN5gmlqtV5WJQDq6sPz//SUXQaXgcxsPKMXLatSqPtA7/tF38lMqvT64">
+<link rel="preload" href="https://all-c-a-p-s.github.io/Graffiti/graffiti-e848da4f701f4a8c_bg.wasm" crossorigin=anonymous integrity="sha384-kGdJ8mxbrAkSRjLO0w9PdILXXnbQmBBqwQi8cth1cNrMGGSEorATnncU4um9NtRQ" as="fetch" type="application/wasm"></head>
 
 <body>
     <!-- The WASM code will resize the canvas dynamically -->
@@ -117,8 +131,17 @@
         </p>
         <div class="lds-dual-ring"></div>
     </div>
+
+    <!--Register Service Worker. this will cache the wasm / js scripts for offline use (for PWA functionality). -->
+    <!-- Force refresh (Ctrl + F5) to load the latest files instead of cached files  -->
+    <script>
+        // We disable caching during development so that we always view the latest version.
+        if ('serviceWorker' in navigator && window.location.hash !== "#dev") {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('sw.js');
+            });
+        }
+    </script>
 </body>
 
 </html>
-
-<!-- Powered by egui: https://github.com/emilk/egui/ -->
