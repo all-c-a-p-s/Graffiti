@@ -1,5 +1,5 @@
 # Graffiti
-Graffiti is a project which aims to integrate the power of AI into climbing training by providing toools to:
+Graffiti is a project which aims to integrate the power of AI into climbing training by providing tools to:
 - predict the grade of a given route on the [moonboard](http://moonboard.com)
 - set its own original routes on the moonboard
 
