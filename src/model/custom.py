@@ -17,8 +17,6 @@ which I originally used (validation loss of ~1.25)
 """
 
 # first some preprocessing code:
-
-
 def convert_coordinate_to_int(coordinate) -> int:
     letter = coordinate[0]
     column = ord(letter.upper()) - ord("A")
@@ -114,8 +112,9 @@ different activation function in output layer - softmax
 inputs = Input(shape=(198,))
 embed = Embedding(input_dim=4, output_dim=8)(inputs)
 flatten = Flatten()(embed)
-dense = Dense(128, activation="sigmoid")(flatten)
-outputs = Dense(11, activation="softmax")(dense)
+dense = Dense(64, activation="relu")(flatten)
+dense_2 = Dense(32, activation="relu")(dense)
+outputs = Dense(11, activation="softmax")(dense_2)
 
 """
 TO TEST:
