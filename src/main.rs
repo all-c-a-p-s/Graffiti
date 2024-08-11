@@ -8,14 +8,11 @@ use crate::climb::*;
 use crate::gui::*;
 use crate::json_parse::*;
 
-
-
 pub mod climb;
 pub mod gui;
 pub mod json_parse;
 #[path = "/Users/seba/rs/graffiti/src/model/model.rs"]
 pub mod model;
-
 
 use crate::gui::Graffiti;
 #[cfg(target_arch = "wasm32")]
@@ -63,6 +60,7 @@ fn main() {
 
 #[cfg(not(target_arch = "wasm32"))]
 fn main() -> eframe::Result {
+
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default(),
         ..Default::default()

@@ -1,14 +1,16 @@
+use std::cmp::max;
+
 use eframe::egui::*;
 use egui::{Color32, Painter, Pos2, Rect, Rounding, Vec2};
 
-use crate::model::run_model;
+use crate::model::{generate_route, run_model};
 
 const START_CIRCLE_COLOUR: Color32 = Color32::GREEN;
 const FINISH_CIRCLE_COLOUR: Color32 = Color32::RED;
 const INTERMEDIATE_CIRCLE_COLOUR: Color32 = Color32::BLUE;
 
 const A18_X_COORDINATE: f32 = 275.0;
-const A18_Y_COORDINATE: f32 = 180.0;
+const A18_Y_COORDINATE: f32 = 175.0;
 
 const HORIZONTAL_GAP: f32 = 40.0;
 const VERTICAL_GAP: f32 = 40.0;
@@ -23,6 +25,7 @@ pub struct Graffiti {
     start_holds: Vec<String>,
     finish_holds: Vec<String>,
     intermediate_holds: Vec<String>,
+    grade: usize,
 }
 
 impl Graffiti {
@@ -34,13 +37,14 @@ impl Graffiti {
             start_holds: vec![],
             finish_holds: vec![],
             intermediate_holds: vec![],
-
+            grade: 4,
         }
     }
 }
 
 impl eframe::App for Graffiti {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        self.grade = max(self.grade, 4);//Box::<Graffiti>::default() sets is to 0
         egui::CentralPanel::default().show(ctx, |ui| {
             egui::ScrollArea::both().show(ui, |ui| {
                 let window_size = ctx.input(|i: &egui::InputState| i.screen_rect());
@@ -80,31 +84,62 @@ impl eframe::App for Graffiti {
                     }
                 });
 
-                let popup_id = Id::new("popup_id");
+                ui.horizontal(|ui| {
+                    let popup_id = Id::new("popup_id");
 
-                let response = ui.add_sized(size_2x1, Button::new("Guess Grade"));
+                    let response = ui.add_sized(size_2x1, Button::new("Guess Grade"));
 
-                let mut output = String::new();
+                    let mut output = String::new();
 
-                if response.clicked() {
-                    ui.memory_mut(|mem| mem.toggle_popup(popup_id));
-                }
+                    if response.clicked() {
+                        ui.memory_mut(|mem| mem.toggle_popup(popup_id));
+                    }
 
-                popup_below_widget(
-                    ui,
-                    popup_id,
-                    &response,
-                    PopupCloseBehavior::CloseOnClickOutside,
-                    |ui| {
-                        ui.set_min_height(20.0);
-                        ui.set_min_width(160.0);
-                        ui.heading(run_model(
+                    popup_below_widget(
+                        ui,
+                        popup_id,
+                        &response,
+                        PopupCloseBehavior::CloseOnClickOutside,
+                        |ui| {
+                            ui.set_min_height(20.0);
+                            ui.set_min_width(160.0);
+                            ui.heading(
+                                run_model(
+                                    self.start_holds.clone(),
+                                    self.finish_holds.clone(),
+                                    self.intermediate_holds.clone(),
+                                )
+                                .expect("failed to run model"),
+                            );
+                        },
+                    );
+
+                    let routesetter = ui.add_sized(size_2x1, Button::new("Generate Route"));
+                    if routesetter.clicked() {
+                        let r = generate_route(
                             self.start_holds.clone(),
                             self.finish_holds.clone(),
                             self.intermediate_holds.clone(),
-                        ).expect("failed to run model"));
-                    },
-                );
+                            self.grade - 4,
+                        );
+                        self.start_holds = r.0;
+                        self.finish_holds = r.1;
+                        self.intermediate_holds = r.2;
+                    }
+
+                    ui.add(egui::Slider::new(&mut self.grade, 4..=14).text("V Grade"));
+
+                    let clear = ui.add_sized(size_2x1, Button::new("Clear All"));
+                    if clear.clicked() {
+                        self.start_holds = Vec::new();
+                        self.finish_holds = Vec::new();
+                        self.intermediate_holds = Vec::new();
+                        self.new_start_hold = String::new();
+                        self.new_finish_hold = String::new();
+                        self.new_intermediate_hold = String::new();
+                        self.grade = 4;
+                    }
+                });
                 ui.add_sized(
                     vec2(900.0, 800.0),
                     egui::Image::new(egui::include_image!(
@@ -112,7 +147,6 @@ impl eframe::App for Graffiti {
                     )),
                 );
 
-                //TODO: maybe change from Foreground so that circles dont move when you scroll
                 let painter = Painter::new(
                     ctx.clone(),
                     LayerId::new(Order::Middle, Id::new("painter_id")),

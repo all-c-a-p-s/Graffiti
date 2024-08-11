@@ -287,8 +287,12 @@ pub fn name_to_arr_index(hold: &str) -> (usize, usize) {
     (row, column)
 }
 
-pub fn hold_index_to_name(i: (usize, usize)) -> String {
-    let column = match i.0 {
+pub fn usize_to_tuple(x: usize) -> (usize, usize) {
+    (x / 18, x % 11)
+}
+
+pub fn hold_index_to_name(i: usize) -> String {
+    let column = match i % 11 {
         0 => 'A',
         1 => 'B',
         2 => 'C',
@@ -303,7 +307,7 @@ pub fn hold_index_to_name(i: (usize, usize)) -> String {
         _ => unreachable!(),
     }
     .to_string();
-    let row = (i.1 - 1).to_string();
+    let row = (i / 11 + 1).to_string();
     column + row.as_str()
 }
 
