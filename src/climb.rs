@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::fmt::Display;
 use std::io;
 
@@ -289,6 +290,79 @@ pub fn name_to_arr_index(hold: &str) -> (usize, usize) {
 
 pub fn usize_to_tuple(x: usize) -> (usize, usize) {
     (x / 18, x % 11)
+}
+
+pub fn check_valid_start_hold(s: &String) -> Result<(), &'static str> {
+    match check_valid_hold_string(s) {
+        Ok(_) => {}
+        Err(e) => return Err(e),
+    };
+
+    let binding = s.to_owned();
+    let number = match binding.as_str().get(1..) {
+        Some(x) => x,
+        None => return Err("input string too short to be a hold"),
+    };
+    let number = match number.parse::<u8>() {
+        Ok(x) => x,
+        Err(e) => return Err("failed to convert hold row to integer"),
+    };
+    match number {
+        1..=6 => Ok(()),
+        _ => Err("only holds on row 1-6 can be start holds"),
+    }
+}
+
+pub fn check_valid_finish_hold(s: &String) -> Result<(), &'static str> {
+    match check_valid_hold_string(s) {
+        Ok(_) => {}
+        Err(e) => return Err(e),
+    };
+
+    let binding = s.to_owned();
+    let number = match binding.as_str().get(1..) {
+        Some(x) => x,
+        None => return Err("input string too short to be a hold"),
+    };
+    let number = match number.parse::<u8>() {
+        Ok(x) => x,
+        Err(e) => return Err("failed to convert hold row to integer"),
+    };
+    match number {
+        18 => Ok(()),
+        _ => Err("only holds on row 18 can be finish holds"),
+    }
+}
+
+pub fn check_valid_hold_string(s: &String) -> Result<(), &'static str> {
+    let empty_holds: HashSet<String> = vec![
+        "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1", "i1", "j1", "k1", "a2", "b2", "c2", "d2",
+        "e2", "f2", "h2", "i2", "k2", "a3", "c3", "e3", "f3", "g3", "h3", "i3", "j3", "k3", "a4",
+        "c4", "d4", "e4", "f4", "h4", "j4", "k4", "b5", "e5", "g5", "a6", "h6", "a7", "a8", "a17",
+        "b17", "c17", "e17", "f17", "h17", "i17", "j17", "k17", "f18", "j18",
+    ]
+    .iter()
+    .map(|x| x.to_string())
+    .collect::<HashSet<String>>();
+    //bolt holds where there is no actual hold
+
+    let mut valid_coordinates = HashSet::new();
+    for l in 'a'..='k' {
+        for n in 1..=18 {
+            let s = l.to_string() + format!("{}", n).as_str();
+            valid_coordinates.insert(s);
+        }
+    }
+
+    if !valid_coordinates.contains(&s.to_lowercase()) {
+        return Err("invalid hold coordinate");
+    }
+
+    if empty_holds.contains(&s.to_lowercase()) {
+        return Err("there is no hold on coordinate");
+    }
+
+    Ok(())
 }
 
 pub fn hold_index_to_name(i: usize) -> String {

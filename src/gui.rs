@@ -4,6 +4,7 @@ use eframe::egui::*;
 use egui::{Color32, Painter, Pos2, Rect, Rounding, Vec2};
 
 use crate::model::{generate_route, run_model};
+use crate::climb::{check_valid_start_hold, check_valid_finish_hold, check_valid_hold_string};
 
 const START_CIRCLE_COLOUR: Color32 = Color32::GREEN;
 const FINISH_CIRCLE_COLOUR: Color32 = Color32::RED;
@@ -26,6 +27,7 @@ pub struct Graffiti {
     finish_holds: Vec<String>,
     intermediate_holds: Vec<String>,
     grade: usize,
+    error_message: Option<String>
 }
 
 impl Graffiti {
@@ -38,13 +40,14 @@ impl Graffiti {
             finish_holds: vec![],
             intermediate_holds: vec![],
             grade: 4,
+            error_message: None,
         }
     }
 }
 
 impl eframe::App for Graffiti {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        self.grade = max(self.grade, 4);//Box::<Graffiti>::default() sets is to 0
+        self.grade = max(self.grade, 4); //Box::<Graffiti>::default() sets is to 0
         egui::CentralPanel::default().show(ctx, |ui| {
             egui::ScrollArea::both().show(ui, |ui| {
                 let window_size = ctx.input(|i: &egui::InputState| i.screen_rect());
@@ -62,16 +65,31 @@ impl eframe::App for Graffiti {
                     ui.text_edit_singleline(&mut self.new_start_hold)
                         .labelled_by(name_label.id);
                     if ui.button("Add").clicked() {
-                        self.start_holds.push(self.new_start_hold.clone());
+                        match check_valid_start_hold(&self.new_start_hold) {
+                            Ok(_) => self.start_holds.push(self.new_start_hold.clone()),
+                            Err(e) => {
+                                eprintln!("{}", e);
+                                self.error_message = Some(e.to_string());
+                            }
+                        }
+                        //in case or error, do not do anything that would actually cause crash
+                        //maybe should give a popup with the error?
                     }
                 });
+
 
                 ui.horizontal(|ui| {
                     let name_label = ui.label("Add finish hold: ");
                     ui.text_edit_singleline(&mut self.new_finish_hold)
                         .labelled_by(name_label.id);
                     if ui.button("Add").clicked() {
-                        self.finish_holds.push(self.new_finish_hold.clone());
+                        match check_valid_finish_hold(&self.new_finish_hold) {
+                            Ok(_) => self.finish_holds.push(self.new_finish_hold.clone()),
+                            Err(e) => {
+                                eprintln!("{}", e);
+                                self.error_message = Some(e.to_string());
+                            }
+                        }
                     }
                 });
                 ui.horizontal(|ui| {
@@ -79,8 +97,14 @@ impl eframe::App for Graffiti {
                     ui.text_edit_singleline(&mut self.new_intermediate_hold)
                         .labelled_by(name_label.id);
                     if ui.button("Add").clicked() {
-                        self.intermediate_holds
-                            .push(self.new_intermediate_hold.clone());
+                        match check_valid_hold_string(&self.new_intermediate_hold) {
+                            Ok(_) => self.intermediate_holds
+                            .push(self.new_intermediate_hold.clone()),
+                            Err(e) => {
+                                eprintln!("{}", e);
+                                self.error_message = Some(e.to_string());
+                            }
+                        }
                     }
                 });
 
@@ -190,6 +214,20 @@ impl eframe::App for Graffiti {
                         RADIUS,
                         egui::Stroke::new(3.0, FINISH_CIRCLE_COLOUR),
                     );
+                }
+
+                if self.error_message.is_some() {
+                    println!("displayed error message");
+                    egui::Window::new("Error")
+                        .collapsible(false)
+                        .resizable(false)
+                        .show(ctx, |ui| {
+                            ui.label(self.error_message.clone().unwrap_or(String::from("unknown error")));
+                            if ui.button("Ok").clicked() {
+                                self.error_message = None;
+                            }
+                            //remove error message after
+                        });
                 }
             });
         });

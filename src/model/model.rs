@@ -72,7 +72,6 @@ pub fn run_routeset_model(
     intermediate_holds: &Vec<String>,
     grade: f32,
 ) -> ort::Result<Option<String>> {
-    println!("{}", grade);
     let mut holds_data: Vec<Vec<f32>> = vec![vec![0.0f32; 11]; 18];
     for hold in start_holds {
         let idx = name_to_arr_index(hold.as_str());
