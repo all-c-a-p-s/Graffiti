@@ -2,8 +2,8 @@ var cacheName = 'graffiti-pwa';
 var filesToCache = [
   './',
   './index.html',
-  './graffiti.js',
-  './graffiti_bg.wasm',
+  './graffiti-2a73655693f4c1a6.js',
+  './graffiti-2a73655693f4c1a6_bg.wasm',
 ];
 
 /* Start the service worker and cache all of the app's content */
