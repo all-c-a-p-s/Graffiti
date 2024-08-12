@@ -11,8 +11,8 @@
     <!-- config for our rust wasm binary. go to https://trunkrs.dev/assets/#rust for more customization -->
     
 <script type="module" nonce="5bhtFTn35q9En6J6JDJncA==">
-import init, * as bindings from '/graffiti-179d6172f85d0ccc.js';
-const wasm = await init('/graffiti-179d6172f85d0ccc_bg.wasm');
+import init, * as bindings from 'https://all-c-a-p-s.github.io/Graffiti//graffiti-179d6172f85d0ccc.js';
+const wasm = await init('https://all-c-a-p-s.github.io/Graffiti//graffiti-179d6172f85d0ccc_bg.wasm');
 
 
 window.wasmBindings = bindings;
@@ -22,7 +22,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
 
 </script>
     <!-- this is the base url relative to which other urls will be constructed. trunk will insert this from the public-url option -->
-    <base href="/" />
+    <base href="https://all-c-a-p-s.github.io/Graffiti/" />
 
     
 
@@ -116,8 +116,8 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         }
     </style>
 
-<link rel="modulepreload" href="/graffiti-179d6172f85d0ccc.js" crossorigin=anonymous integrity="sha384-Nortxkumsrj6tzy59r9ChK/Xs1sWqRTHWTjXIKDhEeOcB9ye/+xgo8Rww8rJ1iyD">
-<link rel="preload" href="/graffiti-179d6172f85d0ccc_bg.wasm" crossorigin=anonymous integrity="sha384-RN+9ryo3sxLS3Qnv6a+iLBhCIAdnGXhfdzbn67Yqs5oEZMtQy7fbm7nnpPE2RLBZ" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="https://all-c-a-p-s.github.io/Graffiti/graffiti-179d6172f85d0ccc.js" crossorigin=anonymous integrity="sha384-Nortxkumsrj6tzy59r9ChK/Xs1sWqRTHWTjXIKDhEeOcB9ye/+xgo8Rww8rJ1iyD">
+<link rel="preload" href="https://all-c-a-p-s.github.io/Graffiti/graffiti-179d6172f85d0ccc_bg.wasm" crossorigin=anonymous integrity="sha384-RN+9ryo3sxLS3Qnv6a+iLBhCIAdnGXhfdzbn67Yqs5oEZMtQy7fbm7nnpPE2RLBZ" as="fetch" type="application/wasm"></head>
 
 <body>
     <!-- The WASM code will resize the canvas dynamically -->
