@@ -3,7 +3,7 @@ Graffiti is a project which aims to integrate the power of AI into climbing trai
 - predict the grade of a given route on the [moonboard](http://moonboard.com)
 - set its own original routes on the moonboard
 
-Imagine you've come up with the perfect start to a moonboard route, but are struggling to come up with ideas for how to complete the route. Simply the holds you have so far and the desired grade of the route, and generate ideas for the rest of the route with the AI model.
+Imagine you've come up with the perfect start to a moonboard route, but are struggling to come up with ideas for how to complete the route. Simply the holds you have so far and the desired grade of the route, and generate ideas for the rest of the route with the AI model. Access the website [here](https://all-c-a-p-s.github.io/Graffiti/).
 
 ![Image 11-08-2024 at 21 30](https://github.com/user-attachments/assets/1462e2c4-b043-4eff-b1d1-daee710c5ffd)
 
@@ -16,11 +16,11 @@ The routesetting model is trained by removing random numbers of holds from exist
 
 
 ## TODOs
-- some code to check for valid user inputs/handle erroneous inputs (such as trying to add holds that do not exist)
 - if possible, fix the issue that my model almost never guesses a grade harder than v11 because climbs with grades > v11 are so rare
-- improve GUI interface + deploy web app
+- more experimentation with different models/architectures
+- expand the project to use differrent kinds of board (2019 moonboard, Kilter Board, Tension Board etc.)
+- try out more ideas involving climbing and AI (reading routes from images, setting routes on non-standardised walls)
 
 ## Contributing
 Not accepting code contributions as I may end up using this for a school project.
 However, since I am very new to ML, so I would welcome any suggestions on how to improve the architecture of the model.
-
