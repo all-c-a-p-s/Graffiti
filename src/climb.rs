@@ -163,7 +163,7 @@ impl Route {
                 k
             ),
         }
-        return Ok(());
+        Ok(())
     }
 
     pub fn from(name: String, grade: Grade, holds: [[Hold; 11]; 18]) -> Self {
@@ -197,7 +197,7 @@ impl Grade {
             .trim();
         let number = number_part.parse::<u8>();
         let number = match number {
-            Ok(n) if (n >= 4 && n <= 14) => n,
+            Ok(n) if (4..=14).contains(&n) => n,
             Ok(_) => {
                 panic!("the grade is not between v4 and v14 (the bounds for moonboard grades)")
             }
@@ -264,7 +264,7 @@ pub fn name_to_arr_index(hold: &str) -> (usize, usize) {
         .expect("grade inputted is invalid because it only contains one character");
     let row = number_part.parse::<usize>();
     let row = match row {
-        Ok(n) if (n >= 1 && n <= 18) => n,
+        Ok(n) if (1..=18).contains(&n) => n,
         Ok(_) => panic!("the row is not between 1 and 18"),
         Err(e) => panic!(
             "expcted a number after the {} character in the grade but found error {}",
@@ -305,7 +305,7 @@ pub fn check_valid_start_hold(s: &String) -> Result<(), &'static str> {
     };
     let number = match number.parse::<u8>() {
         Ok(x) => x,
-        Err(e) => return Err("failed to convert hold row to integer"),
+        Err(_) => return Err("failed to convert hold row to integer"),
     };
     match number {
         1..=6 => Ok(()),
@@ -326,7 +326,7 @@ pub fn check_valid_finish_hold(s: &String) -> Result<(), &'static str> {
     };
     let number = match number.parse::<u8>() {
         Ok(x) => x,
-        Err(e) => return Err("failed to convert hold row to integer"),
+        Err(_) => return Err("failed to convert hold row to integer"),
     };
     match number {
         18 => Ok(()),
@@ -334,7 +334,7 @@ pub fn check_valid_finish_hold(s: &String) -> Result<(), &'static str> {
     }
 }
 
-pub fn check_valid_hold_string(s: &String) -> Result<(), &'static str> {
+pub fn check_valid_hold_string(s: &str) -> Result<(), &'static str> {
     let empty_holds: HashSet<String> = vec![
         "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1", "i1", "j1", "k1", "a2", "b2", "c2", "d2",
         "e2", "f2", "h2", "i2", "k2", "a3", "c3", "e3", "f3", "g3", "h3", "i3", "j3", "k3", "a4",
@@ -391,7 +391,7 @@ impl HoldMatrix {
         let mut arr = [[false; 11]; 18];
         let indidices = s
             .split_whitespace()
-            .map(|x| name_to_arr_index(x))
+            .map(name_to_arr_index)
             .collect::<Vec<(usize, usize)>>();
         for i in indidices {
             arr[i.0][i.1] = true;
@@ -404,12 +404,10 @@ pub fn set_from_hold_names(s: String, route: &mut Route, to_set: PositionState) 
     //taken in as space-separated hold names e.g. A2 B5 D11 etc.
     let indidices = s
         .split_whitespace()
-        .map(|x| name_to_arr_index(x))
+        .map(name_to_arr_index)
         .collect::<Vec<(usize, usize)>>();
-    let mut count = 0;
-    for i in indidices {
+    for (count, i) in indidices.into_iter().enumerate() {
         route.holds[i.0][i.1] = Hold::from(to_set, count);
-        count += 1;
     }
 }
 
@@ -440,7 +438,7 @@ pub fn read_route() -> Route {
     set_from_hold_names(read_holds(), &mut route, PositionState::Handhold);
 
     match route.check_valid() {
-        Ok(_) => return route,
+        Ok(_) => route,
         Err(e) => panic!("{}", e),
     }
 }

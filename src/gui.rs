@@ -1,10 +1,10 @@
 use std::cmp::max;
 
 use eframe::egui::*;
-use egui::{Color32, Painter, Pos2, Rect, Rounding, Vec2};
+use egui::{Color32, Painter, Pos2};
 
+use crate::climb::{check_valid_finish_hold, check_valid_hold_string, check_valid_start_hold};
 use crate::model::{generate_route, run_model};
-use crate::climb::{check_valid_start_hold, check_valid_finish_hold, check_valid_hold_string};
 
 const START_CIRCLE_COLOUR: Color32 = Color32::GREEN;
 const FINISH_CIRCLE_COLOUR: Color32 = Color32::RED;
@@ -27,7 +27,7 @@ pub struct Graffiti {
     finish_holds: Vec<String>,
     intermediate_holds: Vec<String>,
     grade: usize,
-    error_message: Option<String>
+    error_message: Option<String>,
 }
 
 impl Graffiti {
@@ -77,7 +77,6 @@ impl eframe::App for Graffiti {
                     }
                 });
 
-
                 ui.horizontal(|ui| {
                     let name_label = ui.label("Add finish hold: ");
                     ui.text_edit_singleline(&mut self.new_finish_hold)
@@ -98,8 +97,9 @@ impl eframe::App for Graffiti {
                         .labelled_by(name_label.id);
                     if ui.button("Add").clicked() {
                         match check_valid_hold_string(&self.new_intermediate_hold) {
-                            Ok(_) => self.intermediate_holds
-                            .push(self.new_intermediate_hold.clone()),
+                            Ok(_) => self
+                                .intermediate_holds
+                                .push(self.new_intermediate_hold.clone()),
                             Err(e) => {
                                 eprintln!("{}", e);
                                 self.error_message = Some(e.to_string());
@@ -112,8 +112,6 @@ impl eframe::App for Graffiti {
                     let popup_id = Id::new("popup_id");
 
                     let response = ui.add_sized(size_2x1, Button::new("Guess Grade"));
-
-                    let mut output = String::new();
 
                     if response.clicked() {
                         ui.memory_mut(|mem| mem.toggle_popup(popup_id));
@@ -222,7 +220,11 @@ impl eframe::App for Graffiti {
                         .collapsible(false)
                         .resizable(false)
                         .show(ctx, |ui| {
-                            ui.label(self.error_message.clone().unwrap_or(String::from("unknown error")));
+                            ui.label(
+                                self.error_message
+                                    .clone()
+                                    .unwrap_or(String::from("unknown error")),
+                            );
                             if ui.button("Ok").clicked() {
                                 self.error_message = None;
                             }
@@ -235,7 +237,7 @@ impl eframe::App for Graffiti {
 }
 
 fn calculate_centre(hold: String) -> (f32, f32) {
-    let letter = hold.as_str().as_bytes()[0].to_ascii_uppercase();
+    let letter = hold.as_bytes()[0].to_ascii_uppercase();
     let number = hold[1..]
         .parse::<usize>()
         .expect("failed to get number from hold");

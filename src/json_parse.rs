@@ -1,3 +1,5 @@
+#![warn(clippy::all)]
+
 use std::fs::File;
 use std::io::prelude::*;
 
@@ -29,26 +31,27 @@ pub fn read_from_file() -> Result<String, &'static str> {
 
 pub fn get_lines() -> Result<Vec<String>, &'static str> {
     match read_from_file() {
-        Ok(s) => Ok(s
-            .lines()
-            .into_iter()
-            .map(|s| String::from(s))
-            .collect::<Vec<String>>()),
-        Err(e) => return Err(e),
+        Ok(s) => Ok(s.lines().map(String::from).collect::<Vec<String>>()),
+        Err(e) => Err(e),
     }
 }
 
-pub fn next_climb(line_num: usize, lines: &Vec<String>) -> (Option<Vec<String>>, usize) {
+pub fn next_climb(line_num: usize, lines: &[String]) -> (Option<Vec<String>>, usize) {
     if line_num >= LAST_CLIMB_LINE_NUMBER {
         return (None, line_num);
     }
     let mut bracket_count = 0;
     let mut opened: bool = false;
     let mut new_climb: Vec<String> = Vec::new();
-    for line in line_num + 1..=LAST_CLIMB_LINE_NUMBER {
-        new_climb.push(lines[line].clone());
-        for char in 0..lines[line].len() {
-            match lines[line].chars().collect::<Vec<char>>()[char] {
+    for (line_num, line) in lines
+        .iter()
+        .enumerate()
+        .take(LAST_CLIMB_LINE_NUMBER + 1)
+        .skip(line_num + 1)
+    {
+        new_climb.push(line.clone());
+        for char in 0..line.len() {
+            match line.chars().collect::<Vec<char>>()[char] {
                 '{' => {
                     bracket_count += 1;
                     opened = true;
@@ -57,7 +60,7 @@ pub fn next_climb(line_num: usize, lines: &Vec<String>) -> (Option<Vec<String>>,
                 _ => {}
             }
             if bracket_count == 0 && opened {
-                return (Some(new_climb), line);
+                return (Some(new_climb), line_num);
             }
         }
     }
@@ -93,14 +96,13 @@ pub fn get_climbs() -> Result<Vec<Vec<String>>, &'static str> {
     Ok(climbs_list)
 }
 
-pub fn find(target: String, lines: &Vec<String>) -> Option<usize> {
+pub fn find(target: String, lines: &[String]) -> Option<usize> {
     //find target substring in a vec of lines
     let trimmed = lines
         .iter()
         .map(|l| String::from(l.trim()))
         .collect::<Vec<String>>();
-    for line_num in 0..trimmed.len() {
-        let line = &trimmed[line_num];
+    for (line_num, line) in trimmed.iter().enumerate() {
         if line.len() < target.len() {
             continue;
         }
@@ -126,11 +128,11 @@ pub fn parse_climb(mut lines: Vec<String>) -> Route {
     let grade = String::from(
         grade_line
             .split_ascii_whitespace()
-            .map(|x| String::from(x))
+            .map(String::from)
             .collect::<Vec<String>>()[1]
             .strip_suffix(r#"","#)
             .expect("failed to strip suffix from string")
-            .strip_prefix(r#"""#)
+            .strip_prefix('"')
             .expect("failed to strip prefix from string"),
     );
 
@@ -141,8 +143,6 @@ pub fn parse_climb(mut lines: Vec<String>) -> Route {
 
     route.grade = Grade::from_font(grade);
 
-    let mut holds_vec: Vec<Hold> = Vec::new();
-
     let mut cursor = find(String::from(r#""problemId":"#), &lines);
     let mut count = 0;
     //search for this as this string is unique to the lists of holds
@@ -152,7 +152,7 @@ pub fn parse_climb(mut lines: Vec<String>) -> Route {
 
         let hold_position = &lines[hold_position_line]
             .split_ascii_whitespace()
-            .map(|s| String::from(s))
+            .map(String::from)
             .collect::<Vec<String>>()[1][1..=2];
 
         let is_start_line = hold_position_line + 1;
@@ -160,7 +160,7 @@ pub fn parse_climb(mut lines: Vec<String>) -> Route {
         let is_start: bool = String::from(
             &lines[is_start_line]
                 .split_ascii_whitespace()
-                .map(|s| String::from(s))
+                .map(String::from)
                 .collect::<Vec<String>>()[1]
                 .strip_suffix(',')
                 .unwrap()
@@ -174,7 +174,7 @@ pub fn parse_climb(mut lines: Vec<String>) -> Route {
         let is_end: bool = String::from(
             &lines[is_end_line]
                 .split_ascii_whitespace()
-                .map(|s| String::from(s))
+                .map(String::from)
                 .collect::<Vec<String>>()[1]
                 .to_owned(),
         )

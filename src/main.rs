@@ -1,25 +1,11 @@
-#![allow(dead_code)]
-#![allow(unused)]
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-#[cfg(target_arch = "wasm32")]
-use wasm_bindgen::prelude::*;
-
-use crate::climb::*;
-use crate::gui::*;
-use crate::json_parse::*;
-
-pub mod climb;
-pub mod gui;
-pub mod json_parse;
-#[path = "/Users/seba/rs/graffiti/src/model/model.rs"]
-pub mod model;
-
-use crate::gui::Graffiti;
-#[cfg(target_arch = "wasm32")]
-use eframe::web_sys;
+use graffiti::gui::Graffiti;
 
 #[cfg(target_arch = "wasm32")]
 fn main() {
+    #[cfg(feature = "console_error_panic_hook")]
+    console_error_panic_hook::set_once();
     // Redirect `log` message to `console.log` and friends:
     eframe::WebLogger::init(log::LevelFilter::Debug).ok();
 
@@ -30,11 +16,7 @@ fn main() {
             .start(
                 "graffiti_id",
                 web_options,
-                Box::new(|cc| {
-                    // This gives us image support:
-                    egui_extras::install_image_loaders(&cc.egui_ctx);
-                    Ok(Box::<Graffiti>::default())
-                }),
+                Box::new(|cc| Ok(Box::new(Graffiti::new(cc)))),
             )
             .await;
 
@@ -59,7 +41,7 @@ fn main() {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-fn main() -> eframe::Result {
+pub fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default(),
         ..Default::default()
