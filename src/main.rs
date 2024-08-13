@@ -3,9 +3,13 @@
 use graffiti::gui::Graffiti;
 
 #[cfg(target_arch = "wasm32")]
+use eframe::web_sys;
+
+#[cfg(target_arch = "wasm32")]
 fn main() {
     #[cfg(feature = "console_error_panic_hook")]
     console_error_panic_hook::set_once();
+
     // Redirect `log` message to `console.log` and friends:
     eframe::WebLogger::init(log::LevelFilter::Debug).ok();
 
@@ -16,7 +20,11 @@ fn main() {
             .start(
                 "graffiti_id",
                 web_options,
-                Box::new(|cc| Ok(Box::new(Graffiti::new(cc)))),
+                Box::new(|cc| {
+                    // This gives us image support:
+                    egui_extras::install_image_loaders(&cc.egui_ctx);
+                    Ok(Box::<Graffiti>::default())
+                }),
             )
             .await;
 

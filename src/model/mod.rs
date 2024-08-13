@@ -1,6 +1,7 @@
-use std::collections::HashMap;
+use std::io::BufReader;
 
-use ort::{Session, Tensor};
+use tract_core::ndarray;
+use tract_onnx::prelude::*;
 
 use crate::climb::hold_index_to_name;
 use crate::climb::name_to_arr_index;
@@ -9,7 +10,7 @@ pub fn run_model(
     start_holds: Vec<String>,
     finish_holds: Vec<String>,
     intermediate_holds: Vec<String>,
-) -> ort::Result<String> {
+) -> TractResult<String> {
     let mut holds_data: Vec<f32> = vec![0.0; 198];
     for hold in start_holds {
         let idx = name_to_arr_index(hold.as_str());
@@ -26,31 +27,30 @@ pub fn run_model(
 
     //include NN data at compile time
     let nn_data = include_bytes!("/Users/seba/rs/graffiti/models/custom_model.onnx");
-    let session = Session::builder()?.commit_from_memory(nn_data)?;
+    let mut reader = BufReader::new(&nn_data[..]);
 
-    let input_holds = Tensor::from_array(([1, 198], holds_data.clone().into_boxed_slice()))?;
-    let mut inputs = HashMap::new();
-    inputs.insert("input_layer", input_holds);
+    let model = tract_onnx::onnx()
+        .model_for_read(&mut reader)?
+        .into_optimized()?
+        .into_runnable()?;
 
-    let outputs = session.run(inputs)?;
+    let input = tract_ndarray::Array2::from_shape_vec((1, 198), holds_data)?;
+    let input = Tensor::from(input);
+    let output = model.run(tvec!(input.into()))?;
 
-    let mut probabilities: Vec<f32> = Vec::new();
-
-    for (_, output_value) in outputs.iter() {
-        probabilities = output_value
-            .to_owned()
-            .try_extract_tensor::<f32>()?
-            .iter()
-            .cloned()
-            .collect::<Vec<f32>>();
-    }
+    let probabilities = output[0]
+        .to_array_view::<f32>()
+        .expect("failed to convert tensor to array")
+        .as_slice()
+        .unwrap()
+        .to_owned();
 
     let mut max: f32 = 0.0;
     let mut most_likely_grade = 4;
 
-    for (i, p) in probabilities.iter().enumerate() {
+    for i in 0..probabilities.len() {
         if probabilities[i] > max {
-            max = *p;
+            max = probabilities[i];
             most_likely_grade = i + 4;
         }
     }
@@ -62,50 +62,55 @@ pub fn run_routeset_model(
     finish_holds: &Vec<String>,
     intermediate_holds: &Vec<String>,
     grade: f32,
-) -> ort::Result<Option<String>> {
-    let mut holds_data: Vec<Vec<f32>> = vec![vec![0.0f32; 11]; 18];
+) -> TractResult<Option<String>> {
+    let mut holds_data: Vec<f32> = vec![0.0; 198];
     for hold in start_holds {
         let idx = name_to_arr_index(hold.as_str());
-        holds_data[idx.0][idx.1] = 1.0;
+        holds_data[idx.0 * 11 + idx.1] = 1.0;
     }
     for hold in finish_holds {
         let idx = name_to_arr_index(hold.as_str());
-        holds_data[idx.0][idx.1] = 2.0;
+        holds_data[idx.0 * 11 + idx.1] = 2.0;
     }
     for hold in intermediate_holds {
         let idx = name_to_arr_index(hold.as_str());
-        holds_data[idx.0][idx.1] = 3.0;
+        holds_data[idx.0 * 11 + idx.1] = 3.0;
     }
 
     let nn_data = include_bytes!("/Users/seba/rs/graffiti/models/routeset/routeset.onnx");
+    let mut reader = BufReader::new(&nn_data[..]);
 
-    let session = Session::builder()?.commit_from_memory(nn_data)?;
+    let model = tract_onnx::onnx()
+        .model_for_read(&mut reader)?
+        .with_input_fact(0, InferenceFact::dt_shape(f32::datum_type(), [1, 18, 11]))?
+        .with_input_fact(1, InferenceFact::dt_shape(f32::datum_type(), [1, 1]))?
+        .into_optimized()?
+        .into_runnable()?;
 
-    let input_vector = holds_data.iter().flatten().cloned().collect::<Vec<f32>>();
-    let input_holds = Tensor::from_array(([1, 18, 11], input_vector.clone().into_boxed_slice()))?;
-    let input_grade = Tensor::from_array(([1, 1], vec![grade].into_boxed_slice()))?;
+    println!("got to here");
 
-    let mut inputs = HashMap::new();
-    inputs.insert("input_holds", input_holds);
-    inputs.insert("input_grades", input_grade);
+    let input_holds = Tensor::from(tract_ndarray::Array3::from_shape_vec(
+        (1, 18, 11),
+        holds_data.clone(),
+    )?);
+    println!("the shape is {:?}", input_holds.shape());
+    let input_grade = Tensor::from(tract_ndarray::Array2::from_shape_vec((1, 1), vec![grade])?);
+    println!("the shape is {:?}", input_grade.shape());
 
-    let outputs = session.run(inputs)?;
+    let output = model.run(tvec!(input_holds.into(), input_grade.into()))?;
 
-    let mut probabilities: Vec<f32> = Vec::new();
-    for (_, output_value) in outputs.iter() {
-        probabilities = output_value
-            .to_owned()
-            .try_extract_tensor::<f32>()?
-            .iter()
-            .cloned()
-            .collect::<Vec<f32>>();
-    }
+    let probabilities = output[0]
+        .to_array_view::<f32>()
+        .expect("failed to convert tensor to array")
+        .as_slice()
+        .unwrap()
+        .to_owned();
 
     let mut max: f32 = 0.0;
     let mut most_likely_hold = Some(String::new());
 
     for i in 0..probabilities.len() {
-        if i != 198 && (probabilities[i] > max) && (input_vector[i] == 0.0) {
+        if i != 198 && (probabilities[i] > max) && (holds_data[i] == 0.0) {
             max = probabilities[i];
             most_likely_hold = Some(hold_index_to_name(i));
         } else if i == 198 && probabilities[i] > max {

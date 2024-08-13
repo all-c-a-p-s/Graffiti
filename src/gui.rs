@@ -68,7 +68,6 @@ impl eframe::App for Graffiti {
                         match check_valid_start_hold(&self.new_start_hold) {
                             Ok(_) => self.start_holds.push(self.new_start_hold.clone()),
                             Err(e) => {
-                                eprintln!("{}", e);
                                 self.error_message = Some(e.to_string());
                             }
                         }
@@ -85,7 +84,6 @@ impl eframe::App for Graffiti {
                         match check_valid_finish_hold(&self.new_finish_hold) {
                             Ok(_) => self.finish_holds.push(self.new_finish_hold.clone()),
                             Err(e) => {
-                                eprintln!("{}", e);
                                 self.error_message = Some(e.to_string());
                             }
                         }
@@ -101,7 +99,6 @@ impl eframe::App for Graffiti {
                                 .intermediate_holds
                                 .push(self.new_intermediate_hold.clone()),
                             Err(e) => {
-                                eprintln!("{}", e);
                                 self.error_message = Some(e.to_string());
                             }
                         }
