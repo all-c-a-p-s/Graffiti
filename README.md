@@ -16,6 +16,7 @@ The routesetting model is trained by removing random numbers of holds from exist
 
 
 ## TODOs
+- some randomisation in routesetting for variety
 - if possible, fix the issue that my model almost never guesses a grade harder than v11 because climbs with grades > v11 are so rare
 - more experimentation with different models/architectures
 - expand the project to use differrent kinds of board (2019 moonboard, Kilter Board, Tension Board etc.)
