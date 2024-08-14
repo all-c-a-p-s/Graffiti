@@ -6,7 +6,7 @@ pub mod gui;
 pub mod json_parse;
 pub mod model;
 pub mod utils;
-/* 
+/*
 use wasm_bindgen::JsValue;
 use utils::set_panic_hook;
 use wasm_bindgen::prelude::*;

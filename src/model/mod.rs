@@ -48,9 +48,9 @@ pub fn run_model(
     let mut max: f32 = 0.0;
     let mut most_likely_grade = 4;
 
-    for i in 0..probabilities.len() {
-        if probabilities[i] > max {
-            max = probabilities[i];
+    for (i, p) in probabilities.iter().enumerate() {
+        if *p > max {
+            max = *p;
             most_likely_grade = i + 4;
         }
     }
@@ -87,15 +87,11 @@ pub fn run_routeset_model(
         .into_optimized()?
         .into_runnable()?;
 
-    println!("got to here");
-
     let input_holds = Tensor::from(tract_ndarray::Array3::from_shape_vec(
         (1, 18, 11),
         holds_data.clone(),
     )?);
-    println!("the shape is {:?}", input_holds.shape());
     let input_grade = Tensor::from(tract_ndarray::Array2::from_shape_vec((1, 1), vec![grade])?);
-    println!("the shape is {:?}", input_grade.shape());
 
     let output = model.run(tvec!(input_holds.into(), input_grade.into()))?;
 

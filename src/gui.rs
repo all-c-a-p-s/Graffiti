@@ -10,8 +10,8 @@ const START_CIRCLE_COLOUR: Color32 = Color32::GREEN;
 const FINISH_CIRCLE_COLOUR: Color32 = Color32::RED;
 const INTERMEDIATE_CIRCLE_COLOUR: Color32 = Color32::BLUE;
 
-const A18_X_COORDINATE: f32 = 275.0;
-const A18_Y_COORDINATE: f32 = 175.0;
+const A18_X_COORDINATE: f32 = 268.0;
+const A18_Y_COORDINATE: f32 = 168.0;
 
 const HORIZONTAL_GAP: f32 = 40.0;
 const VERTICAL_GAP: f32 = 40.0;
@@ -50,6 +50,8 @@ impl eframe::App for Graffiti {
         self.grade = max(self.grade, 4); //Box::<Graffiti>::default() sets is to 0
         egui::CentralPanel::default().show(ctx, |ui| {
             egui::ScrollArea::both().show(ui, |ui| {
+                let scroll_offset = ui.min_rect().min;
+
                 let window_size = ctx.input(|i: &egui::InputState| i.screen_rect());
                 //gets dimensions of the whole UI Rect
                 //this can then be used to place the circles around holds in the correct places
@@ -133,7 +135,9 @@ impl eframe::App for Graffiti {
                         },
                     );
 
-                    let routesetter = ui.add_sized(size_2x1, Button::new("Generate Route"));
+                    let routesetter = ui
+                        .add_sized(size_2x1, Button::new("Generate From Here"))
+                        .on_hover_text("up starting from highest hold in route");
                     if routesetter.clicked() {
                         let r = generate_route(
                             self.start_holds.clone(),
@@ -177,8 +181,8 @@ impl eframe::App for Graffiti {
 
                     painter.circle_stroke(
                         Pos2 {
-                            x: coordinate.0,
-                            y: coordinate.1,
+                            x: coordinate.0 + scroll_offset.x,
+                            y: coordinate.1 + scroll_offset.y,
                         },
                         RADIUS,
                         egui::Stroke::new(3.0, START_CIRCLE_COLOUR),
@@ -190,8 +194,8 @@ impl eframe::App for Graffiti {
 
                     painter.circle_stroke(
                         Pos2 {
-                            x: coordinate.0,
-                            y: coordinate.1,
+                            x: coordinate.0 + scroll_offset.x,
+                            y: coordinate.1 + scroll_offset.y,
                         },
                         RADIUS,
                         egui::Stroke::new(3.0, INTERMEDIATE_CIRCLE_COLOUR),
@@ -203,8 +207,8 @@ impl eframe::App for Graffiti {
 
                     painter.circle_stroke(
                         Pos2 {
-                            x: coordinate.0,
-                            y: coordinate.1,
+                            x: coordinate.0 + scroll_offset.x,
+                            y: coordinate.1 + scroll_offset.y,
                         },
                         RADIUS,
                         egui::Stroke::new(3.0, FINISH_CIRCLE_COLOUR),
