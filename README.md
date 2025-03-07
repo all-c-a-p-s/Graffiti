@@ -24,4 +24,4 @@ The routesetting model is trained by removing random numbers of holds from exist
 
 ## Contributing
 Not accepting code contributions as I may end up using this for a school project.
-However, since I am very new to ML, so I would welcome any suggestions on how to improve the architecture of the model.
+However, since I am very new to ML, I would welcome any suggestions on how to improve the architecture of the model.
